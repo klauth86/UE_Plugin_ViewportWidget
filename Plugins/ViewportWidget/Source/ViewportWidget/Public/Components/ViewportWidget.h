@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetEntries(const TArray<FViewportWidgetEntry>& entries);
 
+	UFUNCTION(BlueprintCallable)
+	AActor* GetSpawnedActor(const int32 entryIndex) const;
+
 protected:
 	//~ UWidget interface
 	virtual TSharedRef<SWidget> RebuildWidget() override;

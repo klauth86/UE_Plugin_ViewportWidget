@@ -345,6 +345,19 @@ bool SViewportWidget::IsVisible() const
 		;
 }
 
+TWeakObjectPtr<AActor> SViewportWidget::GetSpawnedActor(const int32 entryIndex) const
+{
+	if (Entries.IsSet())
+	{
+		if (Entries.Get().IsValidIndex(entryIndex))
+		{
+			return Entries.Get()[entryIndex].ActorObjectPtr;
+		}
+	}
+
+	return TWeakObjectPtr<AActor>();
+}
+
 TSharedRef<FCustomViewportClient> SViewportWidget::MakeViewportClient()
 {
 	TSharedPtr<FCustomViewportClient> client = MakeShareable(new FCustomViewportClient(PreviewScene.Get(), SharedThis(this)));
@@ -447,6 +460,16 @@ void UViewportWidget::SetEntries(const TArray<FViewportWidgetEntry>& entries)
 	{
 		MyViewportWidget->SetEntries(Entries);
 	}
+}
+
+AActor* UViewportWidget::GetSpawnedActor(const int32 entryIndex) const
+{
+	if (MyViewportWidget.IsValid())
+	{
+		return MyViewportWidget->GetSpawnedActor(entryIndex).IsValid() ? MyViewportWidget->GetSpawnedActor(entryIndex).Get() : nullptr;
+	}
+
+	return nullptr;
 }
 
 TSharedRef<SWidget> UViewportWidget::RebuildWidget()

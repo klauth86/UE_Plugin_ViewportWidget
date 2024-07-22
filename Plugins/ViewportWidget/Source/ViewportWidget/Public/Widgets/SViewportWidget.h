@@ -42,6 +42,8 @@ public:
 	 */
 	TSharedPtr<FSceneViewport> GetSceneViewport() { return SceneViewport; }
 
+	TWeakObjectPtr<AActor> GetSpawnedActor(const int32 entryIndex) const;
+
 protected:
 	virtual TSharedRef<FCustomViewportClient> MakeViewportClient();
 
