@@ -30,6 +30,8 @@ struct VIEWPORTWIDGET_API FViewportWidgetEntry
 	GENERATED_USTRUCT_BODY()
 
 public:
+	static const TArray<FViewportWidgetEntry>& GetEmptyCollection() { static TArray<FViewportWidgetEntry> emptyCollection; return emptyCollection; }
+
 	FViewportWidgetEntry() :ActorClassPtr(nullptr), SpawnTransform(FTransform::Identity), ActorObjectPtr(nullptr) {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -37,24 +39,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform SpawnTransform;
-
-	mutable TWeakObjectPtr<AActor> ActorObjectPtr;
-};
-
-//------------------------------------------------------
-// FViewportWidgetEntry
-//------------------------------------------------------
-
-USTRUCT(BlueprintType)
-struct VIEWPORTWIDGET_API FViewportWidgetEntries
-{
-	GENERATED_USTRUCT_BODY()
-
-public:
-	static const FViewportWidgetEntries& GetEmpty() { static FViewportWidgetEntries empty; return empty; }
-
-	FViewportWidgetEntries() { Collection.Empty(); }
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FViewportWidgetEntry> Collection;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TWeakObjectPtr<AActor> ActorObjectPtr;
 };

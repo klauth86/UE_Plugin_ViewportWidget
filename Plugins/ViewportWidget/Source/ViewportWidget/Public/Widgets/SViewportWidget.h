@@ -15,10 +15,10 @@ class FCustomPreviewScene;
 class VIEWPORTWIDGET_API SViewportWidget : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SViewportWidget) :_ViewportSize(SViewport::FArguments::GetDefaultViewportSize()), _ViewTransform(FTransform::Identity), _Entries(FViewportWidgetEntries::GetEmpty()) {}
+	SLATE_BEGIN_ARGS(SViewportWidget) :_ViewportSize(SViewport::FArguments::GetDefaultViewportSize()), _ViewTransform(FTransform::Identity), _Entries(FViewportWidgetEntry::GetEmptyCollection()) {}
 	SLATE_ATTRIBUTE(FVector2D, ViewportSize);
 	SLATE_ATTRIBUTE(FTransform, ViewTransform);
-	SLATE_ATTRIBUTE(FViewportWidgetEntries, Entries);
+	SLATE_ATTRIBUTE(TArray<FViewportWidgetEntry>, Entries);
 	SLATE_END_ARGS()
 
 	SViewportWidget();
@@ -28,7 +28,7 @@ public:
 
 	void SetViewTransform(const FTransform& viewTransform);
 
-	void SetEntries(const FViewportWidgetEntries& entries);
+	void SetEntries(TArray<FViewportWidgetEntry>& entries);
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
@@ -67,5 +67,5 @@ protected:
 
 	TAttribute<FTransform> ViewTransform;
 
-	TAttribute<FViewportWidgetEntries> Entries;
+	TAttribute<TArray<FViewportWidgetEntry>> Entries;
 };

@@ -277,7 +277,7 @@ void SViewportWidget::Construct(const FArguments& InArgs)
 
 	SetViewTransform(InArgs._ViewTransform.Get(FTransform::Identity));
 
-	SetEntries(InArgs._Entries.Get(FViewportWidgetEntries::GetEmpty()));
+	SetEntries(const_cast<TArray<FViewportWidgetEntry>&>(InArgs._Entries.Get()));
 }
 
 void SViewportWidget::SetViewTransform(const FTransform& viewTransform)
@@ -291,9 +291,9 @@ void SViewportWidget::SetViewTransform(const FTransform& viewTransform)
 	}
 }
 
-void SViewportWidget::SetEntries(const FViewportWidgetEntries& entries)
+void SViewportWidget::SetEntries(TArray<FViewportWidgetEntry>& entries)
 {
-	if (!Entries.IsSet() || IsNotEqual(Entries.Get().Collection, entries.Collection))
+	if (!Entries.IsSet() || IsNotEqual(Entries.Get(), entries))
 	{
 		CleanEntries();
 		Entries = entries;
@@ -359,14 +359,17 @@ void SViewportWidget::CleanEntries()
 {
 	if (UWorld* world = PreviewScene ? PreviewScene->GetWorld() : nullptr)
 	{
-		for (const FViewportWidgetEntry& ViewportWidgetEntry : Entries.Get(FViewportWidgetEntries::GetEmpty()).Collection)
+		if (Entries.IsSet())
 		{
-			if (AActor* actor = ViewportWidgetEntry.ActorObjectPtr.Get())
+			for (FViewportWidgetEntry& ViewportWidgetEntry : const_cast<TArray<FViewportWidgetEntry>&>(Entries.Get()))
 			{
-				world->DestroyActor(actor);
-			}
+				if (AActor* actor = ViewportWidgetEntry.ActorObjectPtr.Get())
+				{
+					world->DestroyActor(actor);
+				}
 
-			ViewportWidgetEntry.ActorObjectPtr.Reset();
+				ViewportWidgetEntry.ActorObjectPtr.Reset();
+			}
 		}
 	}
 }
@@ -375,20 +378,23 @@ void SViewportWidget::AddEntries()
 {
 	if (UWorld* world = PreviewScene ? PreviewScene->GetWorld() : nullptr)
 	{
-		for (const FViewportWidgetEntry& ViewportWidgetEntry : Entries.Get().Collection)
+		if (Entries.IsSet())
 		{
-			if (TSubclassOf<AActor> actorClass = ViewportWidgetEntry.ActorClassPtr.LoadSynchronous())
+			for (FViewportWidgetEntry& ViewportWidgetEntry : const_cast<TArray<FViewportWidgetEntry>&>(Entries.Get()))
 			{
-				FActorSpawnParameters SpawnInfo;
-				SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				SpawnInfo.bNoFail = true;
-				SpawnInfo.ObjectFlags = RF_Transient | RF_Transactional;
+				if (TSubclassOf<AActor> actorClass = ViewportWidgetEntry.ActorClassPtr.LoadSynchronous())
+				{
+					FActorSpawnParameters SpawnInfo;
+					SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+					SpawnInfo.bNoFail = true;
+					SpawnInfo.ObjectFlags = RF_Transient | RF_Transactional;
 
-				AActor* actor = world->SpawnActor(actorClass, &ViewportWidgetEntry.SpawnTransform, SpawnInfo);
+					AActor* actor = world->SpawnActor(actorClass, &ViewportWidgetEntry.SpawnTransform, SpawnInfo);
 
-				ViewportWidgetEntry.ActorObjectPtr = actor;
+					ViewportWidgetEntry.ActorObjectPtr = actor;
 
-				SetupSpawnedActor(actor, world);
+					SetupSpawnedActor(actor, world);
+				}
 			}
 		}
 	}
@@ -433,7 +439,7 @@ void UViewportWidget::SetViewTransform(FTransform viewTransform)
 	}
 }
 
-void UViewportWidget::SetEntries(FViewportWidgetEntries entries)
+void UViewportWidget::SetEntries(const TArray<FViewportWidgetEntry>& entries)
 {
 	Entries = entries;
 

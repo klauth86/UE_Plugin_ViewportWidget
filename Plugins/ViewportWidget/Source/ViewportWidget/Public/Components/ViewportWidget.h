@@ -32,10 +32,10 @@ public:
 	void SetViewTransform(FTransform viewTransform);
 
 	UFUNCTION(BlueprintCallable)
-	FViewportWidgetEntries GetEntries() const { return Entries; }
+	const TArray<FViewportWidgetEntry>& GetEntries() const { return Entries; }
 
 	UFUNCTION(BlueprintCallable)
-	void SetEntries(FViewportWidgetEntries entries);
+	void SetEntries(const TArray<FViewportWidgetEntry>& entries);
 
 protected:
 	//~ UWidget interface
@@ -45,9 +45,9 @@ protected:
 protected:
 	TSharedPtr<SViewportWidget> MyViewportWidget;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform ViewTransform;
 
-	UPROPERTY(EditAnywhere)
-	FViewportWidgetEntries Entries;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FViewportWidgetEntry> Entries;
 };
