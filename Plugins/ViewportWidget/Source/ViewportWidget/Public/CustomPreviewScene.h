@@ -61,7 +61,7 @@ public:
 
 	// Accessors.
 	UWorld* GetWorld() const { return PreviewWorld; }
-	FSceneInterface* GetScene() const { return PreviewWorld->Scene; }
+	FSceneInterface* GetScene() const;
 
 	/** Access to line drawing */
 	class ULineBatchComponent* GetLineBatcher() const { return LineBatcher; }

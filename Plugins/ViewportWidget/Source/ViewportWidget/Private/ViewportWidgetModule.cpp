@@ -6,8 +6,11 @@
 #include "Widgets/SViewportWidget.h"
 #include "Components/ViewportWidget.h"
 
+#include "UObject/UObjectGlobals.h"
+
 #include "SceneView.h"
 #include "SceneViewExtension.h"
+#include "SceneManagement.h"
 
 #include "BufferVisualizationData.h"
 #include "NaniteVisualizationData.h"
@@ -18,17 +21,26 @@
 #include "GPUSkinCacheVisualizationData.h"
 
 #include "LegacyScreenPercentageDriver.h"
+#include "Engine/World.h"
+#include "CanvasTypes.h"
+#include "UnrealEngine.h"
 #include "EngineModule.h"
 #include "Engine/RendererSettings.h"
 #include "Components/LineBatchComponent.h"
+#include "Components/MeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "EngineUtils.h"
 #include "Slate/SceneViewport.h"
+#include "Framework/Application/SlateApplication.h"
 
 #include "AudioDeviceHandle.h"
 #include "AudioDevice.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/ReflectionCaptureComponent.h"
 #include "GameFramework/GameModeBase.h"
+#if WITH_DUMPGPU
+#include "RenderGraph.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "FInputSequenceToolsModule"
 
@@ -46,8 +58,9 @@ FCustomPreviewScene::FCustomPreviewScene(FCustomPreviewScene::ConstructionValues
 		NewObjectFlags = RF_Transactional;
 	}
 
-	PreviewWorld = NewObject<UWorld>(GetTransientPackage(), NAME_None, NewObjectFlags);
-	PreviewWorld->WorldType = EWorldType::GamePreview;
+	PreviewWorld = NewObject<UWorld>();
+	PreviewWorld->SetFlags(NewObjectFlags);
+	PreviewWorld->WorldType = EWorldType::Game;
 
 	FWorldContext& WorldContext = GEngine->CreateNewWorldContext(PreviewWorld->WorldType);
 	WorldContext.SetCurrentWorld(PreviewWorld);
@@ -67,31 +80,11 @@ FCustomPreviewScene::FCustomPreviewScene(FCustomPreviewScene::ConstructionValues
 	//URL += TEXT("?SpectatorOnly=1");
 	//URL = FURL(NULL, *EditorEngine->BuildPlayWorldURL(*PIEMapName, Params.bStartInSpectatorMode, ExtraURLOptions), TRAVEL_Absolute);
 
-	if (CVS.OwningGameInstance && PreviewWorld->WorldType == EWorldType::GamePreview)
-	{
-		PreviewWorld->SetGameInstance(CVS.OwningGameInstance);
-
-		FWorldContext& PreviewWorldContext = GEngine->GetWorldContextFromWorldChecked(PreviewWorld);
-		PreviewWorldContext.OwningGameInstance = CVS.OwningGameInstance;
-		PreviewWorldContext.GameViewport = CVS.OwningGameInstance->GetGameViewportClient();
-		PreviewWorldContext.AddRef(PreviewWorld);
-
-		//PreviewWorldContext.PIEInstance =
-
-		if (CVS.DefaultGameMode)
-		{
-			PreviewWorld->SetGameMode(URL);
-
-			AGameModeBase* Mode = PreviewWorld->GetAuthGameMode<AGameModeBase>();
-			ensure(Mode);
-		}
-	}
-
 	PreviewWorld->InitializeActorsForPlay(URL);
 
 	if (CVS.bDefaultLighting)
 	{
-		LineBatcher = NewObject<ULineBatchComponent>(GetTransientPackage());
+		LineBatcher = NewObject<ULineBatchComponent>();
 		LineBatcher->bCalculateAccurateBounds = false;
 		AddComponent(LineBatcher, FTransform::Identity);
 	}
@@ -198,6 +191,8 @@ FString FCustomPreviewScene::GetReferencerName() const
 {
 	return TEXT("FCustomPreviewScene");
 }
+
+FSceneInterface* FCustomPreviewScene::GetScene() const { return PreviewWorld->Scene; }
 
 void FCustomPreviewScene::UpdateCaptureContents()
 {
@@ -327,20 +322,15 @@ void SViewportWidget::Tick(const FGeometry& AllottedGeometry, const double InCur
 
 bool SViewportWidget::IsVisible() const
 {
-#if WITH_DUMPGPU
-	extern ENGINE_API uint32 GDumpGPU_FrameNumber;
-#endif
-
 	const float VisibilityTimeThreshold = .25f;
 	// The viewport is visible if we don't have a parent layout (likely a floating window) or this viewport is visible in the parent layout.
 	// Also, always render the viewport if DumpGPU is active, regardless of tick time threshold -- otherwise these don't show up due to lag
 	// caused by the GPU dump being triggered.
 	return
-		ViewportWidget.IsValid() &&
 		LastTickTime == 0.0 ||	// Never been ticked
 		FPlatformTime::Seconds() - LastTickTime <= VisibilityTimeThreshold	// Ticked recently
 #if WITH_DUMPGPU
-		|| GDumpGPU_FrameNumber == GFrameNumber	// GPU dump in progress
+		|| FRDGBuilder::IsDumpingFrame()	// GPU dump in progress
 #endif		
 		;
 }
@@ -1182,17 +1172,17 @@ bool FCustomViewportClient::SupportsPreviewResolutionFraction() const
 
 float FCustomViewportClient::GetDefaultPrimaryResolutionFractionTarget() const
 {
-	FStaticResolutionFractionHeuristic StaticHeuristic(EngineShowFlags);
+	FStaticResolutionFractionHeuristic StaticHeuristic;
 
 #if WITH_EDITOR
 	if (FStaticResolutionFractionHeuristic::FUserSettings::EditorOverridePIESettings())
 	{
-		StaticHeuristic.Settings.PullEditorRenderingSettings(bIsRealtime, /* bIsPathTraced = */ EngineShowFlags.PathTracing);
+		StaticHeuristic.Settings.PullEditorRenderingSettings(EViewStatusForScreenPercentage::Desktop);
 	}
 	else
 #endif
 	{
-		StaticHeuristic.Settings.PullRunTimeRenderingSettings();
+		StaticHeuristic.Settings.PullRunTimeRenderingSettings(EViewStatusForScreenPercentage::Desktop);
 	}
 
 	StaticHeuristic.TotalDisplayedPixelCount = FMath::Max(Viewport->GetSizeXY().X * Viewport->GetSizeXY().Y, 1);

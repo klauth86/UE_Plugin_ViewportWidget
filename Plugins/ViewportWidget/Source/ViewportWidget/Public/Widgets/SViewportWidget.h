@@ -5,6 +5,7 @@
 #include "Widgets/SViewport.h"
 #include "ViewportWidgetEntry.h"
 
+class FSceneViewport;
 class FCustomViewportClient;
 class FCustomPreviewScene;
 

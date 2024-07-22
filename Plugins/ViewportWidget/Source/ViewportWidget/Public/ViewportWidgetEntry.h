@@ -34,12 +34,12 @@ public:
 
 	FViewportWidgetEntry() :ActorClassPtr(nullptr), SpawnTransform(FTransform::Identity), ActorObjectPtr(nullptr) {}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ViewportWidgetEntry")
 	TSoftClassPtr<AActor> ActorClassPtr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ViewportWidgetEntry")
 	FTransform SpawnTransform;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ViewportWidgetEntry")
 	TWeakObjectPtr<AActor> ActorObjectPtr;
 };
