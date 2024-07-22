@@ -3,6 +3,7 @@
 #pragma once
 
 #include "UObject/GCObject.h"
+#include "Templates/SubclassOf.h"
 
 //------------------------------------------------------
 // FCustomPreviewScene
@@ -72,11 +73,11 @@ public:
 	void UpdateCaptureContents();
 
 private:
-	TArray<class UActorComponent*> Components;
+	TArray<TObjectPtr<class UActorComponent>> Components;
 
 protected:
-	class UWorld* PreviewWorld = nullptr;
-	class ULineBatchComponent* LineBatcher = nullptr;
+	TObjectPtr<class UWorld> PreviewWorld = nullptr;
+	TObjectPtr<class ULineBatchComponent> LineBatcher = nullptr;
 
 	/** This controls whether or not all mip levels of textures used by UMeshComponents added to this preview window should be loaded and remain loaded. */
 	bool bForceAllUsedMipsResident;

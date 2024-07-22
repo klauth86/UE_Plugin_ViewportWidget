@@ -3,8 +3,13 @@
 #pragma once
 
 #include "ViewportClient.h"
+#include "SceneTypes.h"
+#include "UObject/GCObject.h"
 #include "ShowFlags.h"
 
+class SWindow;
+class FSceneInterface;
+class FSceneView;
 class FSceneViewFamily;
 class FCustomPreviewScene;
 class SViewportWidget;
@@ -454,26 +459,6 @@ public:
 	FText GetCurrentLumenVisualizationModeDisplayName() const;
 
 	/**
-	 * Changes the Strata visualization mode for this viewport.
-	 *
-	 * @param InName	The ID of the required visualization mode
-	 */
-	void ChangeStrataVisualizationMode(FName InName);
-
-	/**
-	 * Checks if a Strata visualization mode is selected.
-	 *
-	 * @param InName	The ID of the required visualization mode
-	 * @return	true if the supplied Strata visualization mode is checked
-	 */
-	bool IsStrataVisualizationModeSelected(FName InName) const { return IsViewModeEnabled(VMI_VisualizeSubstrate) && CurrentStrataVisualizationMode == InName; }
-
-	/**
-	 * Returns the FText display name associated with CurrentStrataVisualizationMode.
-	 */
-	FText GetCurrentStrataVisualizationModeDisplayName() const;
-
-	/**
 	 * Changes the Groom visualization mode for this viewport.
 	 *
 	 * @param InName	The ID of the required visualization mode
@@ -631,7 +616,6 @@ public:
 	FName CurrentBufferVisualizationMode;
 	FName CurrentNaniteVisualizationMode;
 	FName CurrentLumenVisualizationMode;
-	FName CurrentStrataVisualizationMode;
 	FName CurrentGroomVisualizationMode;
 	FName CurrentVirtualShadowMapVisualizationMode;
 

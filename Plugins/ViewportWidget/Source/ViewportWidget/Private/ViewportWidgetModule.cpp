@@ -15,7 +15,6 @@
 #include "BufferVisualizationData.h"
 #include "NaniteVisualizationData.h"
 #include "LumenVisualizationData.h"
-#include "StrataVisualizationData.h"
 #include "GroomVisualizationData.h"
 #include "VirtualShadowMapVisualizationData.h"
 #include "GPUSkinCacheVisualizationData.h"
@@ -556,7 +555,6 @@ FCustomViewportClient::FCustomViewportClient(FCustomPreviewScene* InPreviewScene
 	, CurrentBufferVisualizationMode(NAME_None)
 	, CurrentNaniteVisualizationMode(NAME_None)
 	, CurrentLumenVisualizationMode(NAME_None)
-	, CurrentStrataVisualizationMode(NAME_None)
 	, CurrentGroomVisualizationMode(NAME_None)
 	, CurrentVirtualShadowMapVisualizationMode(NAME_None)
 	, CurrentRayTracingDebugVisualizationMode(NAME_None)
@@ -884,9 +882,6 @@ FSceneView* FCustomViewportClient::CalcSceneView(FSceneViewFamily* ViewFamily, c
 
 	ViewInitOptions.BackgroundColor = GetBackgroundColor();
 
-	// for ortho views to steal perspective view origin
-	ViewInitOptions.bUseFauxOrthoViewPos = true;
-
 	ViewInitOptions.FOV = ModifiedViewFOV;
 
 	ViewInitOptions.OverrideFarClippingPlaneDistance = FarPlane;
@@ -1083,18 +1078,6 @@ FText FCustomViewportClient::GetCurrentVirtualShadowMapVisualizationModeDisplayN
 {
 	checkf(IsViewModeEnabled(VMI_VisualizeVirtualShadowMap), TEXT("In order to call GetCurrentVirtualShadowMapVisualizationMode(), first you must set ViewMode to VMI_VisualizeVirtualShadowMap."));
 	return GetVirtualShadowMapVisualizationData().GetModeDisplayName(CurrentVirtualShadowMapVisualizationMode);
-}
-
-void FCustomViewportClient::ChangeStrataVisualizationMode(FName InName)
-{
-	SetViewMode(VMI_VisualizeSubstrate);
-	CurrentStrataVisualizationMode = InName;
-}
-
-FText FCustomViewportClient::GetCurrentStrataVisualizationModeDisplayName() const
-{
-	checkf(IsViewModeEnabled(VMI_VisualizeSubstrate), TEXT("In order to call GetCurrentSubstrateVisualizationMode(), first you must set ViewMode to VMI_VisualizeSubstrate."));
-	return GetStrataVisualizationData().GetModeDisplayName(CurrentStrataVisualizationMode);
 }
 
 void FCustomViewportClient::ChangeGroomVisualizationMode(FName InName)
@@ -1370,7 +1353,6 @@ void FCustomViewportClient::SetupViewForRendering(FSceneViewFamily& ViewFamily, 
 	View.CurrentBufferVisualizationMode = CurrentBufferVisualizationMode;
 	View.CurrentNaniteVisualizationMode = CurrentNaniteVisualizationMode;
 	View.CurrentLumenVisualizationMode = CurrentLumenVisualizationMode;
-	View.CurrentStrataVisualizationMode = CurrentStrataVisualizationMode;
 	View.CurrentGroomVisualizationMode = CurrentGroomVisualizationMode;
 	View.CurrentVirtualShadowMapVisualizationMode = CurrentVirtualShadowMapVisualizationMode;
 	View.CurrentGPUSkinCacheVisualizationMode = CurrentGPUSkinCacheVisualizationMode;
