@@ -6,8 +6,11 @@
 #include "Widgets/SViewportWidget.h"
 #include "Components/ViewportWidget.h"
 
+#include "UObject/UObjectGlobals.h"
+
 #include "SceneView.h"
 #include "SceneViewExtension.h"
+#include "SceneManagement.h"
 
 #include "BufferVisualizationData.h"
 #include "NaniteVisualizationData.h"
@@ -18,11 +21,17 @@
 #include "GPUSkinCacheVisualizationData.h"
 
 #include "LegacyScreenPercentageDriver.h"
+#include "Engine/World.h"
+#include "CanvasTypes.h"
+#include "UnrealEngine.h"
 #include "EngineModule.h"
 #include "Engine/RendererSettings.h"
 #include "Components/LineBatchComponent.h"
+#include "Components/MeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "EngineUtils.h"
 #include "Slate/SceneViewport.h"
+#include "Framework/Application/SlateApplication.h"
 
 #include "AudioDeviceHandle.h"
 #include "AudioDevice.h"
@@ -46,8 +55,9 @@ FCustomPreviewScene::FCustomPreviewScene(FCustomPreviewScene::ConstructionValues
 		NewObjectFlags = RF_Transactional;
 	}
 
-	PreviewWorld = NewObject<UWorld>(GetTransientPackage(), NAME_None, NewObjectFlags);
-	PreviewWorld->WorldType = EWorldType::GamePreview;
+	PreviewWorld = NewObject<UWorld>();
+	PreviewWorld->SetFlags(NewObjectFlags);
+	PreviewWorld->WorldType = EWorldType::Game;
 
 	FWorldContext& WorldContext = GEngine->CreateNewWorldContext(PreviewWorld->WorldType);
 	WorldContext.SetCurrentWorld(PreviewWorld);
@@ -67,31 +77,11 @@ FCustomPreviewScene::FCustomPreviewScene(FCustomPreviewScene::ConstructionValues
 	//URL += TEXT("?SpectatorOnly=1");
 	//URL = FURL(NULL, *EditorEngine->BuildPlayWorldURL(*PIEMapName, Params.bStartInSpectatorMode, ExtraURLOptions), TRAVEL_Absolute);
 
-	if (CVS.OwningGameInstance && PreviewWorld->WorldType == EWorldType::GamePreview)
-	{
-		PreviewWorld->SetGameInstance(CVS.OwningGameInstance);
-
-		FWorldContext& PreviewWorldContext = GEngine->GetWorldContextFromWorldChecked(PreviewWorld);
-		PreviewWorldContext.OwningGameInstance = CVS.OwningGameInstance;
-		PreviewWorldContext.GameViewport = CVS.OwningGameInstance->GetGameViewportClient();
-		PreviewWorldContext.AddRef(PreviewWorld);
-
-		//PreviewWorldContext.PIEInstance =
-
-		if (CVS.DefaultGameMode)
-		{
-			PreviewWorld->SetGameMode(URL);
-
-			AGameModeBase* Mode = PreviewWorld->GetAuthGameMode<AGameModeBase>();
-			ensure(Mode);
-		}
-	}
-
 	PreviewWorld->InitializeActorsForPlay(URL);
 
 	if (CVS.bDefaultLighting)
 	{
-		LineBatcher = NewObject<ULineBatchComponent>(GetTransientPackage());
+		LineBatcher = NewObject<ULineBatchComponent>();
 		LineBatcher->bCalculateAccurateBounds = false;
 		AddComponent(LineBatcher, FTransform::Identity);
 	}
@@ -198,6 +188,8 @@ FString FCustomPreviewScene::GetReferencerName() const
 {
 	return TEXT("FCustomPreviewScene");
 }
+
+FSceneInterface* FCustomPreviewScene::GetScene() const { return PreviewWorld->Scene; }
 
 void FCustomPreviewScene::UpdateCaptureContents()
 {

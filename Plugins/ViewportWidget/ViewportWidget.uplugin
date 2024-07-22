@@ -1,15 +1,16 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
+	"Version": 1.0,
 	"VersionName": "1.0",
-	"FriendlyName": "ViewportWidget",
-	"Description": "",
-	"Category": "Other",
-	"CreatedBy": "",
-	"CreatedByURL": "",
+	"FriendlyName": "Viewport Widget",
+	"Description": "Viewport Widget",
+	"Category": "UI",
+	"CreatedBy": "Pentangle Studio",
+	"CreatedByURL": "https://github.com/klauth86",
 	"DocsURL": "",
-	"MarketplaceURL": "",
-	"SupportURL": "",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/be8d734ad69c4bf286e9d190e3b4ca3e",
+	"SupportURL": "https://discord.gg/TjxHxkwzRb",
+	"EngineVersion": "5.2.0",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
@@ -18,7 +19,8 @@
 		{
 			"Name": "ViewportWidget",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [ "Win64", "Mac" ]
 		}
 	]
 }

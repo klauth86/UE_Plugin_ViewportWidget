@@ -3,7 +3,9 @@
 #pragma once
 
 #include "ViewportClient.h"
+#include "ShowFlags.h"
 
+class FSceneViewFamily;
 class FCustomPreviewScene;
 class SViewportWidget;
 

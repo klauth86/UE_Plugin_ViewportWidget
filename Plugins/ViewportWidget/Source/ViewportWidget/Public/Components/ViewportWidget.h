@@ -25,19 +25,19 @@ public:
 	virtual const FText GetPaletteCategory() override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ViewportWidget")
 	FTransform GetViewTransform() const { return ViewTransform; }
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "ViewportWidget")
 	void SetViewTransform(FTransform viewTransform);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "ViewportWidget")
 	const TArray<FViewportWidgetEntry>& GetEntries() const { return Entries; }
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "ViewportWidget")
 	void SetEntries(const TArray<FViewportWidgetEntry>& entries);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "ViewportWidget")
 	AActor* GetSpawnedActor(const int32 entryIndex) const;
 
 protected:
@@ -48,9 +48,9 @@ protected:
 protected:
 	TSharedPtr<SViewportWidget> MyViewportWidget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ViewportWidget")
 	FTransform ViewTransform;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ViewportWidget")
 	TArray<FViewportWidgetEntry> Entries;
 };
